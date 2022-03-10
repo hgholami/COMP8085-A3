@@ -11,16 +11,21 @@ args = sys.argv
 num_of_args = 1
 
 c_data = data = train_data = test_data = train_target = test_target = None
+symp_desc = symp_prec = symp_sev = None
 
 def read():
-    global c_data
+    global c_data, symp_desc, symp_prec, symp_sev
     c_data = pd.read_csv('dataset.csv')
+    symp_desc = pd.read_csv('symptom_Description')
+    symp_prec = pd.read_csv('symptom_precaution.csv')
+    symp_sev = pd.read_csv('Symptom_severity.csv')
 
     #print(c_data.head())
     #print(c_data.tail())
 
 #def preprocess():
-
+    #le = preprocessing.LabelEncoder()
+    
 
 def split():
     global c_data, data, train_data, test_data, train_target, test_target
