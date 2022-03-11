@@ -70,6 +70,19 @@ def train():
 
     print(p_has_symptom_disease.show_approx())
 
+    # 2d array of disease true positive false negative and total count
+    #TODO Figure out how to represent each disease i.e list
+    # for i in range(0, len(test_target)):
+    #     symptoms = test_data.iloc[i,:]
+        
+    #     for symptom in symptoms:
+    #         if symptom != 'None':
+    #             p_has_symptom_disease[str(train_target[i]),str(symptom)]+=1
+    
+
+
+#def classify():
+
 def run_bot():
     print("Hello,","\nPlease tell me about the first symptom you are experiencing...")
     symp = input("User Input: ")
