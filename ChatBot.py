@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import re
 import pickle
+from starter import *
 #from sklearn.metrics import accuracy_score
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
@@ -13,7 +14,7 @@ num_of_args = 1
 
 c_data = data = train_data = test_data = train_target = test_target = None
 symp_desc = symp_prec = symp_sev = None
-
+p_disease = p_has_symptom_disease = None
 def read():
     global c_data, symp_desc, symp_prec, symp_sev
     c_data = pd.read_csv('dataset.csv')
@@ -30,12 +31,44 @@ def read():
 
 def split():
     global c_data, data, train_data, test_data, train_target, test_target
+    c_data = c_data.fillna('None')
     data = c_data.iloc[: , 1:]
     target = c_data.iloc[: , 0]
-
+    
     #print(data.head())
     #print(target.head())
     train_data, test_data, train_target, test_target = train_test_split(data, target, train_size=0.9, random_state=10)
+
+def train():
+    global c_data, data, train_data, test_data, train_target, test_target, p_disease, p_has_symptom_disease
+
+    train_data = train_data.reset_index(drop=True)
+    test_data = test_data.reset_index(drop=True)
+    train_target = train_target.reset_index(drop=True)
+    test_target = test_target.reset_index(drop=True)
+
+    diseases = dict()
+
+    for disease in train_target:
+        if(disease not in diseases):
+            diseases.update({disease:1})
+        else:
+            diseases[disease] += 1
+
+    p_disease = ProbDist("Disease", freqs=diseases)
+
+    variables = ['Disease', 'Symptom']
+    p_has_symptom_disease = JointProbDist(variables)
+
+    for i in range(0, len(train_target)):
+        symptoms = train_data.iloc[i,:]
+        for symptom in symptoms:
+            if symptom != 'None':
+                p_has_symptom_disease[str(train_target[i]),str(symptom)]+=1
+
+    p_has_symptom_disease.normalize()
+
+    print(p_has_symptom_disease.show_approx())
 
 def run_bot():
     print("Hello,","\nPlease tell me about the first symptom you are experiencing...")
@@ -85,8 +118,8 @@ def main():
     read()
     #preprocess()
     split()
-
-    run_bot()
+    train()
+    #run_bot()
 
 if __name__ == '__main__':
     main()
