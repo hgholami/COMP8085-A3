@@ -38,7 +38,7 @@ def split():
     
     #print(data.head())
     #print(target.head())
-    train_data, test_data, train_target, test_target = train_test_split(data, target, train_size=0.9, random_state=10)
+    train_data, test_data, train_target, test_target = train_test_split(data, target, train_size=0.9, random_state=42)
 
 def train():
     global c_data, data, train_data, test_data, train_target, test_target, p_disease, p_has_symptom_disease
@@ -50,7 +50,7 @@ def train():
 
     diseases = dict()
     prob_diseases = dict()
-
+    
     for disease in train_target:
         if(disease not in diseases):
             diseases.update({disease:1})
@@ -73,7 +73,7 @@ def train():
     #print(p_has_symptom_disease.show_approx())
     # print('Disease dict:', diseases)
     # print('Test target length:',len(test_target))
-    b = False
+    
     prediction_list = list()
     # print('p_disease:',p_disease.show_approx())
     # print("")
@@ -82,22 +82,32 @@ def train():
     #Within 492 test data
     for i in range(0, len(test_target)):
         symptoms = test_data.iloc[i,:]
-        for symptom in symptoms:
-            if symptom is not 'None':
-                for key in diseases:
-                    #prob_diseases[key] = p_disease[key] * math.prod((p_has_symptom_disease[key,symptom] ))
-                    prob_diseases[key] *= p_has_symptom_disease[key, symptom]
-                
-        for key in diseases:
-            prob_diseases[key] *= p_disease[key]
-    
 
-        prediction_list.append(max(prob_diseases))
+        clean_symptoms = [symp for symp in symptoms if symp != 'None']
+        # print(clean_symptoms)
+        for key in prob_diseases:
+            # for symp in clean_symptoms:
+            # print(p_has_symptom_disease['Pneumonia',' chills'])
+            prob_diseases[key] = p_disease[key] * math.prod((p_has_symptom_disease[key,symp] for symp in clean_symptoms))
+            #prob_diseases[key] *= p_has_symptom_disease[key, symptom]
+                
+        # for key in diseases:
+        #     prob_diseases[key] *= p_disease[key]
+    
+        #print(prob_diseases[max(prob_diseases)])
+        prediction_list.append(max(prob_diseases, key=prob_diseases.get))
+        # maximum = max(prob_diseases, key=prob_diseases.get)  # Just use 'min' instead of 'max' for minimum.
+        # print(maximum, prob_diseases[maximum])
+        #print('prob_diseases:',prob_diseases)
+        
         prob_diseases = prob_diseases.fromkeys(prob_diseases, 1)
-        # if not b:
-        #     (print('Symptoms:', symptom) for symptom in symptoms if symptom != 'None')
-        #     b = True
+        
     print('prediction list:',prediction_list)
+
+    print('test_target:',test_target.values)
+
+
+    print(classification_report(test_target.values, prediction_list))
     # print('target;',test_target)
 
     
