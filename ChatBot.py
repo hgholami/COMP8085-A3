@@ -74,6 +74,23 @@ def train():
     # print('Disease dict:', diseases)
     # print('Test target length:',len(test_target))
     
+
+    # print('target;',test_target)
+
+    
+def validate():
+    global test_data, test_target, p_disease, p_has_symptom_disease
+
+    diseases = dict()
+    prob_diseases = dict()
+    
+    for disease in test_target:
+        if(disease not in diseases):
+            diseases.update({disease:1})
+            prob_diseases.update({disease:1})
+        else:
+            diseases[disease] += 1
+
     prediction_list = list()
     # print('p_disease:',p_disease.show_approx())
     # print("")
@@ -108,10 +125,6 @@ def train():
 
 
     print(classification_report(test_target.values, prediction_list))
-    # print('target;',test_target)
-
-    
-
 
 
     # 2d array of disease true positive false negative and total count
@@ -175,6 +188,7 @@ def main():
     #preprocess()
     split()
     train()
+    validate()
     #run_bot()
 
 if __name__ == '__main__':
