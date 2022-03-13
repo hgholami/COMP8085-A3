@@ -1,6 +1,7 @@
 import sys
 import pandas as pd
 import numpy as np
+import math
 import re
 import pickle
 from starter import *
@@ -48,10 +49,12 @@ def train():
     test_target = test_target.reset_index(drop=True)
 
     diseases = dict()
+    prob_diseases = dict()
 
     for disease in train_target:
         if(disease not in diseases):
             diseases.update({disease:1})
+            prob_diseases.update({disease:1})
         else:
             diseases[disease] += 1
 
@@ -68,6 +71,37 @@ def train():
 
     p_has_symptom_disease.normalize()
     #print(p_has_symptom_disease.show_approx())
+    # print('Disease dict:', diseases)
+    # print('Test target length:',len(test_target))
+    b = False
+    prediction_list = list()
+    # print('p_disease:',p_disease.show_approx())
+    # print("")
+    # print('p_has_symptom_disease', p_has_symptom_disease.show_approx())
+    
+    #Within 492 test data
+    for i in range(0, len(test_target)):
+        symptoms = test_data.iloc[i,:]
+        for symptom in symptoms:
+            if symptom is not 'None':
+                for key in diseases:
+                    #prob_diseases[key] = p_disease[key] * math.prod((p_has_symptom_disease[key,symptom] ))
+                    prob_diseases[key] *= p_has_symptom_disease[key, symptom]
+                
+        for key in diseases:
+            prob_diseases[key] *= p_disease[key]
+    
+
+        prediction_list.append(max(prob_diseases))
+        prob_diseases = prob_diseases.fromkeys(prob_diseases, 1)
+        # if not b:
+        #     (print('Symptoms:', symptom) for symptom in symptoms if symptom != 'None')
+        #     b = True
+    print('prediction list:',prediction_list)
+    # print('target;',test_target)
+
+    
+
 
 
     # 2d array of disease true positive false negative and total count
@@ -78,7 +112,6 @@ def train():
     #     for symptom in symptoms:
     #         if symptom != 'None':
     #             p_has_symptom_disease[str(train_target[i]),str(symptom)]+=1
-    
 
 
 #def classify():
