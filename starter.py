@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from collections import defaultdict
 import numpy as np
 
@@ -107,13 +108,30 @@ class JointProbDist(ProbDist):
         Returns the normalized distribution.
         Raises a ZeroDivisionError if the sum of the values is 0."""
         # this is not as easy to generalize as the one for ProbDist
-        for categories in self.values('Category'): #[ham, spam]
+        
+        #print('Here now')
+        #print('count: ',self.prob)
+        for categories in self.values('Disease'): #[41 diseases]
+            # print('categories: ',categories)
+            #print('count: ',self.prob)
+            sum = 0
             count = 0
-            for word in self.values('HasWord'):
-                count += self[categories, word]
-            for word in self.values('HasWord'):
-                self[categories,word] /= count
+            for word in self.values('Symptom'):
+                try:
+                    count += self.prob[categories, word]
+                except KeyError:
+                    pass
+            for word in self.values('Symptom'):
+                try:
+                    self[categories,word] /= count
+                    sum += self[categories,word]
+                except KeyError:
+                    pass
+                
+            # print('Sum:', sum)
+            # print('Count:', count)
         #print(len(self.prob.values()))
+        #print(self.prob.values())
         #raise NotImplementedError
 
     def __repr__(self):

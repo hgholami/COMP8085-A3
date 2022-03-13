@@ -67,8 +67,8 @@ def train():
                 p_has_symptom_disease[str(train_target[i]),str(symptom)]+=1
 
     p_has_symptom_disease.normalize()
+    #print(p_has_symptom_disease.show_approx())
 
-    print(p_has_symptom_disease.show_approx())
 
     # 2d array of disease true positive false negative and total count
     #TODO Figure out how to represent each disease i.e list
