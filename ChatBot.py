@@ -23,6 +23,10 @@ symptoms_of_diseases_dict = dict(defaultdict=set)
 def read():
     global c_data, symp_desc, symp_prec, symp_sev
     c_data = pd.read_csv('dataset.csv')
+    for col in c_data.columns:
+        if pd.api.types.is_string_dtype(c_data[col]):
+            c_data[col] = c_data[col].str.strip()
+
     symp_desc = pd.read_csv('symptom_Description.csv', header=None)
     symp_prec = pd.read_csv('symptom_precaution.csv', header=None)
     symp_sev = pd.read_csv('Symptom_severity.csv', header=None)
@@ -118,14 +122,11 @@ def validate():
         # print(maximum, prob_diseases[maximum])
         #print('prob_diseases:',prob_diseases)
         
-        prob_diseases = prob_diseases.fromkeys(prob_diseases, 1)
+        prob_diseases = prob_diseases.fromkeys(prob_diseases, 0)
         
     #print('prediction list:',prediction_list)
-
     #print('test_target:',test_target.values)
-
-    print(p_disease['Acne']*p_has_symptom_disease['Acne','blackheads'])
-    print(classification_report(test_target.values, prediction_list))
+    #print(classification_report(test_target.values, prediction_list))
 
 
     # 2d array of disease true positive false negative and total count
@@ -212,15 +213,16 @@ def run_bot():
                 prob_diseases[key] = p_disease[key] * math.prod((p_has_symptom_disease[key, c_symp] for c_symp in confirmed_symptoms))
             
             for key in prob_diseases:
-                if prob_diseases[key] <= 0:
-                    probable_diseases.remove(key)
+                if prob_diseases[key] <= 0 and key in probable_diseases:
+                    probable_diseases.remove(str(key))
+
         elif str.lower(answer).strip() == "no":
-            probable_symptoms.remove(probable_symptoms[0])
+            probable_symptoms.remove(str(probable_symptoms[0]))
         else:
             print("Please enter answer \"yes\" or \"no\"...")
     
     # print(probable_symptoms)
-    # print(probable_diseases)
+    print("Probable Disease ", probable_diseases)
 
     # for index, row in (c_data[c_data.iloc[:,0]]).iterrows():
     #     if index in probable_diseases:
@@ -245,8 +247,8 @@ def main():
     #preprocess()
     split()
     train()
-    validate()
-    #run_bot()
+    #validate()
+    run_bot()
 
 if __name__ == '__main__':
     main()
