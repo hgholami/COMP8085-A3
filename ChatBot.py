@@ -1,4 +1,5 @@
 from collections import defaultdict
+from operator import indexOf
 import sys
 import pandas as pd
 import numpy as np
@@ -23,14 +24,24 @@ symptoms_of_diseases_dict = dict(defaultdict=set)
 def read():
     global c_data, symp_desc, symp_prec, symp_sev
     c_data = pd.read_csv('dataset.csv')
-    for col in c_data.columns:
+    for col in c_data.iloc[:,1:].columns:
         if pd.api.types.is_string_dtype(c_data[col]):
             c_data[col] = c_data[col].str.strip()
-
+            c_data[col] = c_data[col].str.replace("\s*[ ]\s*", "", regex=True)
+            #c_data[col].replace("\s*[ ]\s*", "")
+            # c_data[col] = c_data[col].sub("\s*[ ]\s*", "")
+    
+    # c_data = c_data.replace("\s*[ ]\s*", "")
+    
     symp_desc = pd.read_csv('symptom_Description.csv', header=None)
+
+    #columns_names = []
     symp_prec = pd.read_csv('symptom_precaution.csv', header=None)
+    symp_prec = symp_prec.fillna('None')
+
     symp_sev = pd.read_csv('Symptom_severity.csv', header=None)
 
+    #print(symp_sev)
     #print(c_data.head())
     #print(c_data.tail())
 
@@ -126,7 +137,7 @@ def validate():
         
     #print('prediction list:',prediction_list)
     #print('test_target:',test_target.values)
-    #print(classification_report(test_target.values, prediction_list))
+    print(classification_report(test_target.values, prediction_list))
 
 
     # 2d array of disease true positive false negative and total count
@@ -223,7 +234,46 @@ def run_bot():
             print("Please enter answer \"yes\" or \"no\"...")
     
     # print(probable_symptoms)
-    print("Probable Disease ", probable_diseases)
+    most_probable_disease = probable_diseases[probable_diseases.index(max(prob_diseases, key=prob_diseases.get))]
+    # print("Probable Diseases: ", probable_diseases)
+    # print("Most Probable Disease: ", most_probable_disease)
+
+    # for index, row in symp_sev
+
+    #int(symp_sev.loc[symp_sev[0] == confirmed_symptoms][1])
+
+    sev_sum = 0
+    for c_sym in confirmed_symptoms:
+        # print(int(symp_sev.loc[symp_sev[0] == c_sym][1]))
+        sev_sum += int(symp_sev.loc[symp_sev[0] == c_sym][1])
+
+    sick_sev_score = (sev_sum*dur)/(len(confirmed_symptoms)+1)
+
+    if sick_sev_score > 13:
+        print("You should seek consultation from a doctor!")
+    else:
+        print("It might not be that bad but you should take precautions.")
+        # print("All probs: ", [prob_diseases[key] for key in probable_diseases])
+        prob_sum = sum(prob_diseases[key] for key in probable_diseases)
+        prob_score = round(prob_diseases[most_probable_disease]/prob_sum * 100, 2)
+        print("I'm " + str(prob_score) + "% confident you are facing",most_probable_disease + ".")
+        print("Take following measures:")
+        
+        print(symp_prec[symp_prec.iloc[:,0] == most_probable_disease].iloc[:,1:])
+        #clean_precs = [prec for symp in symptoms if symp != 'None']
+        precs = list()
+        for col in symp_prec[symp_prec.iloc[:,0] == most_probable_disease].iloc[:,1:]:
+            print(col)
+            precs.append(col)
+        
+        print(precs)
+
+        # for index, row in symp_prec.iterrows():
+        #     print(index, row)
+        
+    #print(sick_sev_score)
+    
+    # print(sev_sum)
 
     # for index, row in (c_data[c_data.iloc[:,0]]).iterrows():
     #     if index in probable_diseases:
