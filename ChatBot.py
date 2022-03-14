@@ -186,7 +186,7 @@ def run_bot():
     
     # print(max(prob_diseases, key=prob_diseases.get))
     # print(prob_diseases)
-    print(prob_diseases)
+    # print(prob_diseases)
     probable_diseases = list()
     probable_symptoms = list()
     for key in prob_diseases:
@@ -202,9 +202,10 @@ def run_bot():
     print("Please answer \"yes\" or \"no\" to the following questions:")
 
     confirmed_symptoms = [symp]
+    probable_symptoms.remove(symp)
     # print(probable_diseases)
     while len(probable_diseases) > 1 and len(probable_symptoms) > 1:
-        answer = input("Are you experiencing " + str(probable_symptoms[0]))
+        answer = input("Are you experiencing " + str(probable_symptoms[0]) + "?\nUser Input: ")
         if str.lower(answer).strip() == "yes":
             confirmed_symptoms.append(probable_symptoms[0])
             probable_symptoms.remove(probable_symptoms[0])
