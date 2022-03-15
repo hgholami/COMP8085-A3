@@ -1,4 +1,4 @@
-import sys
+import sys, getopt
 import pandas as pd
 import math
 import re
@@ -11,17 +11,20 @@ num_of_args = 1
 
 c_data = data = train_data = test_data = train_target = test_target = None
 symp_desc = symp_prec = symp_sev = None
+t_data = None
+use_t_data = False
 p_disease = p_has_symptom_disease = None
 diseases = prob_diseases = dict()
 symptoms_of_diseases_dict = dict(defaultdict=set)
 
-def read():
-    global c_data, symp_desc, symp_prec, symp_sev
+def read(t_data_path=None):
+    global c_data, symp_desc, symp_prec, symp_sev, t_data, use_t_data
     c_data = pd.read_csv('dataset.csv')
     for col in c_data.iloc[:,1:].columns:
         if pd.api.types.is_string_dtype(c_data[col]):
             c_data[col] = c_data[col].str.strip()
             c_data[col] = c_data[col].str.replace("\s*[ ]\s*", "", regex=True)
+    c_data = c_data.fillna('None')
     
     symp_desc = pd.read_csv('symptom_Description.csv', header=None)
 
@@ -29,15 +32,29 @@ def read():
     symp_prec = symp_prec.fillna('None')
 
     symp_sev = pd.read_csv('Symptom_severity.csv', header=None)
-    
+
+    #If testdata given, read and save as DataFrame
+    if t_data_path != None:
+        use_t_data = True
+        t_data = pd.read_csv(t_data_path)
+        for col in t_data.iloc[:,1:].columns:
+            if pd.api.types.is_string_dtype(t_data[col]):
+                t_data[col] = t_data[col].str.strip()
+                t_data[col] = t_data[col].str.replace("\s*[ ]\s*", "", regex=True)
+        t_data = t_data.fillna('None')
 
 def split():
     global c_data, data, train_data, test_data, train_target, test_target
-    c_data = c_data.fillna('None')
     data = c_data.iloc[: , 1:]
     target = c_data.iloc[: , 0]
 
-    train_data, test_data, train_target, test_target = train_test_split(data, target, train_size=0.9, random_state=42)
+    if not use_t_data:
+        train_data, test_data, train_target, test_target = train_test_split(data, target, train_size=0.9, random_state=42)
+    else:
+        train_data = data
+        train_target = target
+        test_data = t_data.iloc[:,1:]
+        test_target = t_data.iloc[:,0]
 
 def train():
     global c_data, data, train_data, test_data, train_target, test_target, p_disease, p_has_symptom_disease, diseases, prob_diseases
@@ -78,7 +95,7 @@ def validate():
 
     prediction_list = list()
     
-    #Within 492 test data
+    #Within test data
     for i in range(0, len(test_target)):
         symptoms = test_data.iloc[i,:]
 
@@ -196,16 +213,30 @@ def run_bot():
             print ("    ",i,")",symp_prec[symp_prec.iloc[:,0] == most_probable_disease].iloc[:,1:][i].values[0])
 
 
-def main():
-    if(len(args) != num_of_args):
-        print("Expected number of arguments is ", num_of_args, "...")
-        return
-    
-    read()
+def main(argv):
+    testdatapath = ''
+    if len(argv) <= 1:
+        read()
+    try:
+        opts, args = getopt.getopt(argv,"hd:", ["data="])
+    except getopt.GetoptError:
+        print('python ChatBot.py -d <testdata.csv>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('ChatBot.py #Will train and test bot with given dataset.csv',
+            '\n-d OR --data <testdata.csv> #[Optional][Long: --data]Will train on data.csv and test using <testdata.csv>')
+            sys.exit()
+        elif opt in ("-d", "--data"):
+            testdatapath = arg
+            read(testdatapath)
+        
     split()
     train()
     validate()
     run_bot()
+    
+    
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
