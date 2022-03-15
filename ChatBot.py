@@ -214,9 +214,8 @@ def run_bot():
 
 
 def main(argv):
-    testdatapath = ''
-    if len(argv) <= 1:
-        read()
+    testdatapath = None
+    
     try:
         opts, args = getopt.getopt(argv,"hd:", ["data="])
     except getopt.GetoptError:
@@ -229,8 +228,8 @@ def main(argv):
             sys.exit()
         elif opt in ("-d", "--data"):
             testdatapath = arg
-            read(testdatapath)
-        
+            
+    read(testdatapath)
     split()
     train()
     validate()
