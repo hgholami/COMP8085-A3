@@ -215,25 +215,33 @@ def run_bot():
 
 def main(argv):
     testdatapath = None
-    
+    bot_opt = valid_opt = False
     try:
-        opts, args = getopt.getopt(argv,"hd:", ["data="])
+        opts, args = getopt.getopt(argv,"hd:bv", ["data=", "bot", "validate"])
     except getopt.GetoptError:
         print('python ChatBot.py -d <testdata.csv>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
             print('ChatBot.py #Will train and test bot with given dataset.csv',
-            '\n-d OR --data <testdata.csv> #[Optional][Long: --data]Will train on data.csv and test using <testdata.csv>')
+            '\n-d OR --data <testdata.csv> #[Optional]Will train on dataset.csv and test using <testdata.csv>',
+            '\n-b OR --bot #Will run chatbot',
+            '\n-v OR --validate #Will show validation scores')
             sys.exit()
         elif opt in ("-d", "--data"):
             testdatapath = arg
+            valid_opt = True
+        elif opt in ("-b", "--bot"):
+            bot_opt = True
+        elif opt in ("-v", "--validate"):
+            valid_opt = True
+
             
     read(testdatapath)
     split()
     train()
-    validate()
-    run_bot()
+    if valid_opt: validate()
+    if bot_opt: run_bot()
     
     
 
