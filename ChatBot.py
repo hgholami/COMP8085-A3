@@ -213,7 +213,7 @@ def run_bot():
         prob_sum = sum(prob_diseases[key] for key in probable_diseases)
         prob_score = round(prob_diseases[most_probable_disease]/prob_sum * 100, 2)
         print("I'm " + str(prob_score) + "% confident you are facing",most_probable_disease + ".")
-        print("Take following measures:")
+        print("Take the following measures:")
         
         
         columns = list(symp_prec[symp_prec.iloc[:,0] == most_probable_disease].iloc[:,1:])
