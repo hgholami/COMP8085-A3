@@ -166,6 +166,7 @@ def run_bot():
         print("Please answer \"yes\" or \"no\" to the following questions:")
 
     confirmed_symptoms = [symp]
+    denied_symptoms = []
     probable_symptoms.remove(symp)
 
     while len(probable_diseases) > 1 and len(probable_symptoms) > 1:
@@ -180,8 +181,15 @@ def run_bot():
             for key in prob_diseases:
                 if prob_diseases[key] <= 0 and key in probable_diseases:
                     probable_diseases.remove(str(key))
+            
+            probable_symptoms.clear()
+            for probd in probable_diseases:
+                probable_symptoms.extend([x for x in symptoms_of_diseases_dict[probd] if x not in probable_symptoms 
+                                                                                    and x not in confirmed_symptoms
+                                                                                    and x not in denied_symptoms])
 
         elif str.lower(answer).strip() == "no":
+            denied_symptoms.append(probable_symptoms[0])
             probable_symptoms.remove(str(probable_symptoms[0]))
         else:
             print("Please enter answer \"yes\" or \"no\"...")
