@@ -103,7 +103,7 @@ class JointProbDist(ProbDist):
         """Return the set of possible values for a variable."""
         return self.vals[var]
 
-    def normalize(self):
+    def normalize(self, disease_count):
         """Make sure the probabilities of all values sum to 1.
         Returns the normalized distribution.
         Raises a ZeroDivisionError if the sum of the values is 0."""
@@ -116,18 +116,17 @@ class JointProbDist(ProbDist):
             #print('count: ',self.prob)
             sum = 0
             count = 0
+            # for word in self.values('Symptom'):
+            #     try:
+            #         count += self.prob[categories, word]
+            #     except KeyError:
+            #         pass
             for word in self.values('Symptom'):
                 try:
-                    count += self.prob[categories, word]
-                except KeyError:
-                    pass
-            for word in self.values('Symptom'):
-                try:
-                    self[categories,word] /= count
+                    self[categories,word] /= disease_count[categories]
                     sum += self[categories,word]
                 except KeyError:
                     pass
-                
             # print('Sum:', sum)
             # print('Count:', count)
         #print(len(self.prob.values()))

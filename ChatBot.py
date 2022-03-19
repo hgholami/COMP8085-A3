@@ -72,12 +72,18 @@ def train():
             diseases[disease] += 1
 
     p_disease = ProbDist("Disease", freqs=diseases)
-
+    
     variables = ['Disease', 'Symptom']
     p_has_symptom_disease = JointProbDist(variables)
-
+    disease_count = dict()
     for i in range(0, len(train_target)):
         symptoms = train_data.iloc[i,:]
+        
+        if(train_target[i] in disease_count):
+            disease_count[train_target[i]] +=1
+        else:
+            disease_count[train_target[i]] = 1
+
         for symptom in symptoms:
             if symptom != 'None':
                 p_has_symptom_disease[str(train_target[i]),str(symptom)]+=1
@@ -87,7 +93,7 @@ def train():
                 else:
                     symptoms_of_diseases_dict[train_target[i]].add(symptom)
 
-    p_has_symptom_disease.normalize()
+    p_has_symptom_disease.normalize(disease_count)
 
     
 def validate():
