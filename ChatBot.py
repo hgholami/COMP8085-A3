@@ -113,7 +113,7 @@ def validate():
         
         prob_diseases = prob_diseases.fromkeys(prob_diseases, 0)
         
-    print(classification_report(test_target.values, prediction_list))
+    print(classification_report(test_target.values, prediction_list, zero_division=1))
 
 def run_bot():
     global p_disease, p_has_symptom_disease, diseases, prob_diseases
